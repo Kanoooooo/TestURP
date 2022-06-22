@@ -33,7 +33,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TextureSample0:
-        m_Texture: {fileID: 2800000, guid: c42ca700425801e4f819f5d0b7e0aaff, type: 3}
+        m_Texture: {fileID: 2800000, guid: 17ae05947e192e14f9826877ab27f524, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _TextureSample1:
@@ -67,17 +67,22 @@ Material:
     m_Ints: []
     m_Floats:
     - _AlphaCutoff: 0.5
-    - _Float1: 1.77
-    - _Float4: 3.34
+    - _Float0: 3.09
+    - _Float1: 1
+    - _Float2: 0.52
+    - _Float3: 0.28
+    - _Float4: 0.8
     - _Float5: 4.83
     - _Float6: 1
     - _QueueControl: 0
     - _QueueOffset: 0
     m_Colors:
     - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
-    - _MainSpeed: {r: 0.29, g: 0, b: 0, a: 0}
+    - _MainSpeed: {r: 0.1, g: 0, b: 0, a: 0}
     - _MainSpeed1: {r: 2.26, g: 0.4, b: 0, a: 0}
     - _MainSpeed2: {r: 1.27, g: 0.52, b: 0, a: 0}
-    - _Vector1: {r: 2, g: 2, b: 0, a: 0}
-    - _Vector2: {r: 0.47, g: 1.26, b: 0.66, a: 2.96}
+    - _MaskSpeed1: {r: 0, g: 0.66, b: 0, a: 0}
+    - _Vector0: {r: 0.1, g: 0.5, b: 0, a: 0}
+    - _Vector1: {r: 1.71, g: 1.42, b: 0, a: 0}
+    - _Vector2: {r: -0.04, g: 0.02, b: 0, a: 2.96}
   m_BuildTextureStacks: []

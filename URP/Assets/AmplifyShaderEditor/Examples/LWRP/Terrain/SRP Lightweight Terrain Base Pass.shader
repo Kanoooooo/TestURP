@@ -10,7 +10,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
     }
 
-
     SubShader
     {
 		
@@ -61,7 +60,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             #pragma vertex vert
         	#pragma fragment frag
 
-        	#define ASE_SRP_VERSION 51601
         	#define ASE_LW_FINAL_COLOR_ALPHA_MULTIPLY 1
         	#define TERRAIN_SPLAT_BASEPASS 1
 
@@ -72,12 +70,15 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
         	#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
         	#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
 
+            CBUFFER_START(UnityPerMaterial)
 			float4 _Color;
 			sampler2D _MainTex;
 			float4 _MainTex_ST;
 			sampler2D _MetallicTex;
 			float4 _MetallicTex_ST;
-
+			CBUFFER_END
+			
+			
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
@@ -102,8 +103,8 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             	UNITY_VERTEX_OUTPUT_STEREO
             };
 
-			
-            GraphVertexOutput vert (GraphVertexInput v  )
+
+            GraphVertexOutput vert (GraphVertexInput v)
         	{
         		GraphVertexOutput o = (GraphVertexOutput)0;
                 UNITY_SETUP_INSTANCE_ID(v);
@@ -151,10 +152,9 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
         		return o;
         	}
 
-        	half4 frag (GraphVertexOutput IN  ) : SV_Target
+        	half4 frag (GraphVertexOutput IN ) : SV_Target
             {
             	UNITY_SETUP_INSTANCE_ID(IN);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
 
         		float3 WorldSpaceNormal = normalize(float3(IN.tSpace0.z,IN.tSpace1.z,IN.tSpace2.z));
 				float3 WorldSpaceTangent = float3(IN.tSpace0.x,IN.tSpace1.x,IN.tSpace2.x);
@@ -257,7 +257,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             #pragma vertex ShadowPassVertex
             #pragma fragment ShadowPassFragment
 
-            #define ASE_SRP_VERSION 51601
             #define TERRAIN_SPLAT_BASEPASS 1
 
 
@@ -266,6 +265,10 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
+            CBUFFER_START(UnityPerMaterial)
+						CBUFFER_END
+			
+			
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
@@ -274,7 +277,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-			
+
         	struct VertexOutput
         	{
         	    float4 clipPos      : SV_POSITION;
@@ -282,11 +285,11 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
         	};
 
-			
             // x: global clip space bias, y: normal world space bias
+            float4 _ShadowBias;
             float3 _LightDirection;
 
-            VertexOutput ShadowPassVertex(GraphVertexInput v )
+            VertexOutput ShadowPassVertex(GraphVertexInput v)
         	{
         	    VertexOutput o;
         	    UNITY_SETUP_INSTANCE_ID(v);
@@ -309,12 +312,11 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
                 float scale = invNdotL * _ShadowBias.y;
 
                 // normal bias is negative since we want to apply an inset normal offset
-                positionWS = _LightDirection * _ShadowBias.xxx + positionWS;
-				positionWS = normalWS * scale.xxx + positionWS;
+                positionWS = normalWS * scale.xxx + positionWS;
                 float4 clipPos = TransformWorldToHClip(positionWS);
 
                 // _ShadowBias.x sign depens on if platform has reversed z buffer
-                //clipPos.z += _ShadowBias.x;
+                clipPos.z += _ShadowBias.x;
 
         	#if UNITY_REVERSED_Z
         	    clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
@@ -326,7 +328,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
         	    return o;
         	}
 
-            half4 ShadowPassFragment(VertexOutput IN  ) : SV_TARGET
+            half4 ShadowPassFragment(VertexOutput IN) : SV_TARGET
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -366,7 +368,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             #pragma vertex vert
             #pragma fragment frag
 
-            #define ASE_SRP_VERSION 51601
             #define TERRAIN_SPLAT_BASEPASS 1
 
 
@@ -375,7 +376,11 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
+			CBUFFER_START(UnityPerMaterial)
+						CBUFFER_END
 			
+			
+           
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
@@ -383,6 +388,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
 				
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
+
 
         	struct VertexOutput
         	{
@@ -392,9 +398,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
                 UNITY_VERTEX_OUTPUT_STEREO
         	};
 
-			           
-
-            VertexOutput vert(GraphVertexInput v  )
+            VertexOutput vert(GraphVertexInput v)
             {
                 VertexOutput o = (VertexOutput)0;
         	    UNITY_SETUP_INSTANCE_ID(v);
@@ -415,7 +419,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
         	    return o;
             }
 
-            half4 frag(VertexOutput IN  ) : SV_TARGET
+            half4 frag(VertexOutput IN) : SV_TARGET
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -446,24 +450,25 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
             // Required to compile gles 2.0 with standard srp library
             #pragma prefer_hlslcc gles
             #pragma exclude_renderers d3d11_9x
+            
 
             #pragma vertex vert
             #pragma fragment frag
 
-            #define ASE_SRP_VERSION 51601
-            #define TERRAIN_SPLAT_BASEPASS 1
 
+            
 
 			uniform float4 _MainTex_ST;
-			
+
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/MetaInput.hlsl"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
-			float4 _Color;
-			sampler2D _MainTex;
-
+			CBUFFER_START(UnityPerMaterial)
+						CBUFFER_END
+			
+			
             #pragma shader_feature _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature EDITOR_VISUALIZATION
 
@@ -473,30 +478,25 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
                 float4 vertex : POSITION;
 				float3 ase_normal : NORMAL;
 				float4 texcoord1 : TEXCOORD1;
-				float4 texcoord2 : TEXCOORD2;
-				float4 ase_texcoord : TEXCOORD0;
+				
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
         	struct VertexOutput
         	{
         	    float4 clipPos      : SV_POSITION;
-                float4 ase_texcoord : TEXCOORD0;
+                
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
         	};
 
-			
-            VertexOutput vert(GraphVertexInput v  )
+            VertexOutput vert(GraphVertexInput v)
             {
                 VertexOutput o = (VertexOutput)0;
         	    UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-				o.ase_texcoord.xy = v.ase_texcoord.xy;
 				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord.zw = 0;
 
 				float3 vertexValue =  float3(0,0,0) ;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
@@ -506,24 +506,18 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
 				#endif
 
 				v.ase_normal =  v.ase_normal ;
-#if !defined( ASE_SRP_VERSION ) || ASE_SRP_VERSION  > 51300				
-                o.clipPos = MetaVertexPosition(v.vertex, v.texcoord1.xy, v.texcoord1.xy, unity_LightmapST, unity_DynamicLightmapST);
-#else
-				o.clipPos = MetaVertexPosition (v.vertex, v.texcoord1.xy, v.texcoord2.xy, unity_LightmapST);
-#endif
+				
+                o.clipPos = MetaVertexPosition(v.vertex, v.texcoord1.xy, v.texcoord1.xy, unity_LightmapST);
         	    return o;
             }
 
-            half4 frag(VertexOutput IN  ) : SV_TARGET
+            half4 frag(VertexOutput IN) : SV_TARGET
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
-           		float2 uv_MainTex = IN.ase_texcoord.xy * _MainTex_ST.xy + _MainTex_ST.zw;
-           		float4 tex2DNode6 = tex2D( _MainTex, uv_MainTex );
-           		float4 lerpResult7 = lerp( _Color , tex2DNode6 , 1.0);
            		
 				
-		        float3 Albedo = lerpResult7.rgb;
+		        float3 Albedo = float3(0.5, 0.5, 0.5);
 				float3 Emission = 0;
 				float Alpha = 1;
 				float AlphaClipThreshold = 0;
@@ -548,17 +542,17 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainBasePass"
 	
 }
 /*ASEBEGIN
-Version=16705
-420;350;1003;669;1222.224;538.7235;1;True;False
+Version=16201
+442;73;933;593;1187.224;500.7235;1;True;False
 Node;AmplifyShaderEditor.ColorNode;5;-855.9635,-176.0151;Float;False;Property;_Color;Color;2;0;Create;True;0;0;False;0;0,0,0,0;0,0,0,0;False;0;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.RangedFloatNode;4;-595.5383,57.15771;Float;False;Constant;_Float0;Float 0;3;0;Create;True;0;0;False;0;1;0;0;0;0;1;FLOAT;0
 Node;AmplifyShaderEditor.SamplerNode;6;-922.2748,32.78433;Float;True;Property;_MainTex;MainTex;0;0;Create;True;0;0;False;0;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;6;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.LerpOp;7;-468.5384,-119.8423;Float;False;3;0;COLOR;0,0,0,0;False;1;COLOR;0,0,0,0;False;2;FLOAT;0;False;1;COLOR;0
 Node;AmplifyShaderEditor.SamplerNode;8;-917.7739,265.0548;Float;True;Property;_MetallicTex;MetallicTex;1;0;Create;True;0;0;False;0;None;None;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;6;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;True;ShadowCaster;0;1;ShadowCaster;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;3;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;True;DepthOnly;0;2;DepthOnly;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;-250,-110;Float;False;True;2;Float;ASEMaterialInspector;0;2;ASESampleShaders/SRP Lightweight/TerrainBasePass;1976390536c6c564abb90fe41f6ee334;True;Base;0;0;Base;11;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=-100;True;2;0;True;0;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;True;True;True;True;True;0;False;-1;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=LightweightForward;False;1;Define;TERRAIN_SPLAT_BASEPASS 1;False;;;0;0;Standard;2;Vertex Position,InvertActionOnDeselection;1;Receive Shadows;1;1;_FinalColorxAlpha;1;4;True;True;True;True;False;11;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;9;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;6;FLOAT;0;False;7;FLOAT;0;False;8;FLOAT3;0,0,0;False;10;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;9;-250,-80;Float;False;False;2;Float;ASEMaterialInspector;0;1;Hidden/Templates/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;True;Meta;0;3;Meta;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;True;2;False;-1;False;False;False;False;False;True;1;LightMode=Meta;False;0;;0;0;Standard;0;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;3;FLOAT;0;False;4;FLOAT3;0,0,0;False;5;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;0;1;ShadowCaster;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;3;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;0;2;DepthOnly;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;-250,-110;Float;False;True;2;Float;ASEMaterialInspector;0;2;ASESampleShaders/SRP Lightweight/TerrainBasePass;1976390536c6c564abb90fe41f6ee334;0;0;Base;11;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=-100;True;2;0;True;0;1;False;-1;0;False;-1;0;1;False;-1;0;False;-1;False;False;False;True;True;True;True;True;0;False;-1;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=LightweightForward;False;1;Define;TERRAIN_SPLAT_BASEPASS 1;False;;;0;0;Standard;1;Vertex Position,InvertActionOnDeselection;1;1;_FinalColorxAlpha;1;4;True;True;True;True;11;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;9;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;6;FLOAT;0;False;7;FLOAT;0;False;8;FLOAT3;0,0,0;False;10;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;9;-250,-80;Float;False;False;2;Float;ASEMaterialInspector;0;1;Hidden/Templates/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;0;3;Meta;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;True;2;False;-1;False;False;False;False;False;True;1;LightMode=Meta;False;0;;0;0;Standard;0;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;3;FLOAT;0;False;4;FLOAT3;0,0,0;False;5;FLOAT3;0,0,0;False;0
 WireConnection;7;0;5;0
 WireConnection;7;1;6;0
 WireConnection;7;2;4;0
@@ -566,4 +560,4 @@ WireConnection;1;0;7;0
 WireConnection;1;3;8;1
 WireConnection;1;4;6;4
 ASEEND*/
-//CHKSM=D18DF0E8F0ECB9544246D5DEF3ACA267718FC5F2
+//CHKSM=3A7BCE57EFC32A11333DFC9C434607D6107C13D5

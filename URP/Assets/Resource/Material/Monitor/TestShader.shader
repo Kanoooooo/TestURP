@@ -1,14 +1,15 @@
 // Made with Amplify Shader Editor
 // Available at the Unity Asset Store - http://u3d.as/y3X 
-Shader "TestShader"
+Shader "FrameAnimation"
 {
 	Properties
 	{
 		[HideInInspector] _AlphaCutoff("Alpha Cutoff ", Range(0, 1)) = 0.5
 		[HideInInspector] _EmissionColor("Emission Color", Color) = (1,1,1,1)
-		_Movie02_texture("Movie02_texture", 2D) = "white" {}
-		_Rows("Rows", Int) = 8
-		_Columns("Columns", Int) = 32
+		_MainTexture("主纹理", 2D) = "white" {}
+		_Rows("列数", Int) = 8
+		_Columns("行数", Int) = 32
+		_Speed("速度", Int) = 38
 
 		[HideInInspector][NoScaleOffset]unity_Lightmaps("unity_Lightmaps", 2DArray) = "" {}
         [HideInInspector][NoScaleOffset]unity_LightmapsInd("unity_LightmapsInd", 2DArray) = "" {}
@@ -69,10 +70,11 @@ Shader "TestShader"
 
 			
 
-			sampler2D _Movie02_texture;
+			sampler2D _MainTexture;
 			CBUFFER_START( UnityPerMaterial )
 			int _Columns;
 			int _Rows;
+			int _Speed;
 			CBUFFER_END
 
 
@@ -151,7 +153,7 @@ Shader "TestShader"
 				float fbcolsoffset21 = 1.0f / (float)_Columns;
 				float fbrowsoffset21 = 1.0f / (float)_Rows;
 				// Speed of animation
-				float fbspeed21 = _TimeParameters.x * 20.0;
+				float fbspeed21 = _TimeParameters.x * (float)_Speed;
 				// UV Tiling (col and row offset)
 				float2 fbtiling21 = float2(fbcolsoffset21, fbrowsoffset21);
 				// UV Offset - calculate current tile linear index, and convert it to (X * coloffset, Y * rowoffset)
@@ -174,7 +176,7 @@ Shader "TestShader"
 				half2 fbuv21 = texCoord22 * fbtiling21 + fboffset21;
 				// *** END Flipbook UV Animation vars ***
 				
-				float4 Color = tex2D( _Movie02_texture, fbuv21 );
+				float4 Color = tex2D( _MainTexture, fbuv21 );
 
 				#if ETC1_EXTERNAL_ALPHA
 					float4 alpha = SAMPLE_TEXTURE2D( _AlphaTex, sampler_AlphaTex, IN.texCoord0.xy );
@@ -240,10 +242,11 @@ Shader "TestShader"
 
 			
 
-			sampler2D _Movie02_texture;
+			sampler2D _MainTexture;
 			CBUFFER_START( UnityPerMaterial )
 			int _Columns;
 			int _Rows;
+			int _Speed;
 			CBUFFER_END
 
 
@@ -322,7 +325,7 @@ Shader "TestShader"
 				float fbcolsoffset21 = 1.0f / (float)_Columns;
 				float fbrowsoffset21 = 1.0f / (float)_Rows;
 				// Speed of animation
-				float fbspeed21 = _TimeParameters.x * 20.0;
+				float fbspeed21 = _TimeParameters.x * (float)_Speed;
 				// UV Tiling (col and row offset)
 				float2 fbtiling21 = float2(fbcolsoffset21, fbrowsoffset21);
 				// UV Offset - calculate current tile linear index, and convert it to (X * coloffset, Y * rowoffset)
@@ -345,7 +348,7 @@ Shader "TestShader"
 				half2 fbuv21 = texCoord22 * fbtiling21 + fboffset21;
 				// *** END Flipbook UV Animation vars ***
 				
-				float4 Color = tex2D( _Movie02_texture, fbuv21 );
+				float4 Color = tex2D( _MainTexture, fbuv21 );
 
 				#if ETC1_EXTERNAL_ALPHA
 					float4 alpha = SAMPLE_TEXTURE2D( _AlphaTex, sampler_AlphaTex, IN.texCoord0.xy );
@@ -411,10 +414,11 @@ Shader "TestShader"
         
 			
 
-			sampler2D _Movie02_texture;
+			sampler2D _MainTexture;
 			CBUFFER_START( UnityPerMaterial )
 			int _Columns;
 			int _Rows;
+			int _Speed;
 			CBUFFER_END
 
 
@@ -479,7 +483,7 @@ Shader "TestShader"
 				float fbcolsoffset21 = 1.0f / (float)_Columns;
 				float fbrowsoffset21 = 1.0f / (float)_Rows;
 				// Speed of animation
-				float fbspeed21 = _TimeParameters.x * 20.0;
+				float fbspeed21 = _TimeParameters.x * (float)_Speed;
 				// UV Tiling (col and row offset)
 				float2 fbtiling21 = float2(fbcolsoffset21, fbrowsoffset21);
 				// UV Offset - calculate current tile linear index, and convert it to (X * coloffset, Y * rowoffset)
@@ -502,7 +506,7 @@ Shader "TestShader"
 				half2 fbuv21 = texCoord22 * fbtiling21 + fboffset21;
 				// *** END Flipbook UV Animation vars ***
 				
-				float4 Color = tex2D( _Movie02_texture, fbuv21 );
+				float4 Color = tex2D( _MainTexture, fbuv21 );
 
 				half4 outColor = half4(_ObjectId, _PassValue, 1.0, 1.0);
 				return outColor;
@@ -548,10 +552,11 @@ Shader "TestShader"
         
         	
 
-			sampler2D _Movie02_texture;
+			sampler2D _MainTexture;
 			CBUFFER_START( UnityPerMaterial )
 			int _Columns;
 			int _Rows;
+			int _Speed;
 			CBUFFER_END
 
 
@@ -614,7 +619,7 @@ Shader "TestShader"
 				float fbcolsoffset21 = 1.0f / (float)_Columns;
 				float fbrowsoffset21 = 1.0f / (float)_Rows;
 				// Speed of animation
-				float fbspeed21 = _TimeParameters.x * 20.0;
+				float fbspeed21 = _TimeParameters.x * (float)_Speed;
 				// UV Tiling (col and row offset)
 				float2 fbtiling21 = float2(fbcolsoffset21, fbrowsoffset21);
 				// UV Offset - calculate current tile linear index, and convert it to (X * coloffset, Y * rowoffset)
@@ -637,7 +642,7 @@ Shader "TestShader"
 				half2 fbuv21 = texCoord22 * fbtiling21 + fboffset21;
 				// *** END Flipbook UV Animation vars ***
 				
-				float4 Color = tex2D( _Movie02_texture, fbuv21 );
+				float4 Color = tex2D( _MainTexture, fbuv21 );
 				half4 outColor = _SelectionID;
 				return outColor;
 			}
@@ -652,22 +657,24 @@ Shader "TestShader"
 }
 /*ASEBEGIN
 Version=18935
-1923;338;1080;1231;1374.825;217.5027;1;True;False
-Node;AmplifyShaderEditor.SimpleTimeNode;24;-736.9573,343.1022;Inherit;False;1;0;FLOAT;1;False;1;FLOAT;0
-Node;AmplifyShaderEditor.TextureCoordinatesNode;22;-1018.511,150.2088;Inherit;False;0;-1;2;3;2;SAMPLER2D;;False;0;FLOAT2;1,1;False;1;FLOAT2;0,0;False;5;FLOAT2;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.IntNode;26;-813.825,-57.50275;Inherit;False;Property;_Columns;Columns;2;0;Create;True;0;0;0;False;0;False;32;32;False;0;1;INT;0
-Node;AmplifyShaderEditor.IntNode;27;-829.825,44.49725;Inherit;False;Property;_Rows;Rows;1;0;Create;True;0;0;0;False;0;False;8;8;False;0;1;INT;0
+161;73;1423;557;1229.511;9.223267;1;True;False
+Node;AmplifyShaderEditor.TextureCoordinatesNode;22;-830.511,22.2088;Inherit;False;0;-1;2;3;2;SAMPLER2D;;False;0;FLOAT2;1,1;False;1;FLOAT2;0,0;False;5;FLOAT2;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
+Node;AmplifyShaderEditor.IntNode;29;-781.0989,331.5826;Inherit;False;Property;_Speed;速度;3;0;Create;False;0;0;0;False;0;False;38;0;False;0;1;INT;0
+Node;AmplifyShaderEditor.IntNode;27;-779.825,244.4973;Inherit;False;Property;_Rows;列数;1;0;Create;False;0;0;0;False;0;False;8;8;False;0;1;INT;0
+Node;AmplifyShaderEditor.IntNode;26;-776.825,161.4973;Inherit;False;Property;_Columns;行数;2;0;Create;False;0;0;0;False;0;False;32;32;False;0;1;INT;0
+Node;AmplifyShaderEditor.SimpleTimeNode;24;-796.957,432.7021;Inherit;False;1;0;FLOAT;1;False;1;FLOAT;0
 Node;AmplifyShaderEditor.TFHCFlipBookUVAnimation;21;-511.168,123.7491;Inherit;False;0;0;6;0;FLOAT2;0,0;False;1;FLOAT;32;False;2;FLOAT;8;False;3;FLOAT;20;False;4;FLOAT;0;False;5;FLOAT;0;False;3;FLOAT2;0;FLOAT;1;FLOAT;2
-Node;AmplifyShaderEditor.SamplerNode;2;-240.3887,116.3374;Inherit;True;Property;_Movie02_texture;Movie02_texture;0;0;Create;True;0;0;0;False;0;False;-1;f6c848ad828c77a4b883f7d87237f45e;6d58da2e7e3c52a48bfa32a4be08f071;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;17;99,20;Float;False;True;-1;2;ASEMaterialInspector;0;14;TestShader;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit;0;0;Sprite Unlit;4;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;True;2;5;False;-1;10;False;-1;3;1;False;-1;10;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;-1;False;False;False;False;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;False;True;2;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=Universal2D;False;False;0;Hidden/InternalErrorShader;0;0;Standard;3;Vertex Position;1;0;Debug Display;0;0;External Alpha;0;0;0;4;True;True;True;True;False;;False;0
+Node;AmplifyShaderEditor.SamplerNode;2;-240.3887,116.3374;Inherit;True;Property;_MainTexture;主纹理;0;0;Create;False;0;0;0;False;0;False;-1;f6c848ad828c77a4b883f7d87237f45e;6d58da2e7e3c52a48bfa32a4be08f071;True;0;False;white;Auto;False;Object;-1;Auto;Texture2D;8;0;SAMPLER2D;;False;1;FLOAT2;0,0;False;2;FLOAT;0;False;3;FLOAT2;0,0;False;4;FLOAT2;0,0;False;5;FLOAT;1;False;6;FLOAT;0;False;7;SAMPLERSTATE;;False;5;COLOR;0;FLOAT;1;FLOAT;2;FLOAT;3;FLOAT;4
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;18;99,20;Float;False;False;-1;2;ASEMaterialInspector;0;14;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit Forward;0;1;Sprite Unlit Forward;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;True;2;5;False;-1;10;False;-1;3;1;False;-1;10;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;-1;False;False;False;False;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;False;True;2;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=UniversalForward;False;False;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;19;99,20;Float;False;False;-1;2;ASEMaterialInspector;0;14;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;SceneSelectionPass;0;2;SceneSelectionPass;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=SceneSelectionPass;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
 Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;20;99,20;Float;False;False;-1;2;ASEMaterialInspector;0;14;New Amplify Shader;cf964e524c8e69742b1d21fbe2ebcc4a;True;ScenePickingPass;0;3;ScenePickingPass;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;0;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;1;LightMode=Picking;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;Hidden/InternalErrorShader;0;0;Standard;0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;17;114.6,124;Float;False;True;-1;2;ASEMaterialInspector;0;14;FrameAnimation;cf964e524c8e69742b1d21fbe2ebcc4a;True;Sprite Unlit;0;0;Sprite Unlit;4;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;2;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;3;RenderPipeline=UniversalPipeline;RenderType=Transparent=RenderType;Queue=Transparent=Queue=0;True;0;True;17;d3d9;d3d11;glcore;gles;gles3;metal;vulkan;xbox360;xboxone;xboxseries;ps4;playstation;psp2;n3ds;wiiu;switch;nomrt;0;False;True;2;5;False;-1;10;False;-1;3;1;False;-1;10;False;-1;False;False;False;False;False;False;False;False;False;False;False;False;False;False;True;True;True;True;True;0;False;-1;False;False;False;False;False;False;False;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;False;True;2;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=Universal2D;False;False;0;Hidden/InternalErrorShader;0;0;Standard;3;Vertex Position;1;0;Debug Display;0;0;External Alpha;0;0;0;4;True;True;True;True;False;;False;0
 WireConnection;21;0;22;0
 WireConnection;21;1;26;0
 WireConnection;21;2;27;0
+WireConnection;21;3;29;0
 WireConnection;21;5;24;0
 WireConnection;2;1;21;0
 WireConnection;17;1;2;0
 ASEEND*/
-//CHKSM=7B74192EA4585362ADFDD5B83F319DDB5B7F3EFE
+//CHKSM=B2DE78EAE08EA0D0D63ED037FD58AB37C1386CA4

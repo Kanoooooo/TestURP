@@ -24,7 +24,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
 		[HideInInspector] _texcoord( "", 2D ) = "white" {}
     }
 
-
     SubShader
     {
 		
@@ -75,7 +74,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             #pragma vertex vert
         	#pragma fragment frag
 
-        	#define ASE_SRP_VERSION 51601
         	#define _NORMALMAP 1
         	#define ASE_LW_FINAL_COLOR_ALPHA_MULTIPLY 1
         	#define TERRAIN_SPLAT_ADDPASS 1
@@ -87,6 +85,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
         	#include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
         	#include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
 
+            CBUFFER_START(UnityPerMaterial)
 			sampler2D _Control;
 			float4 _Control_ST;
 			float _Smoothness0;
@@ -109,7 +108,9 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
 			float _Metallic1;
 			float _Metallic2;
 			float _Metallic3;
-
+			CBUFFER_END
+			
+			
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
@@ -134,23 +135,24 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             	UNITY_VERTEX_OUTPUT_STEREO
             };
 
-			
-            GraphVertexOutput vert (GraphVertexInput v  )
+
+            GraphVertexOutput vert (GraphVertexInput v)
         	{
         		GraphVertexOutput o = (GraphVertexOutput)0;
                 UNITY_SETUP_INSTANCE_ID(v);
             	UNITY_TRANSFER_INSTANCE_ID(v, o);
         		UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * v.ase_normal * 0.0 ) );
+				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * 0.0 ) );
 				v.ase_tangent.xyz = cross ( v.ase_normal, float3( 0, 0, 1 ) );
 				v.ase_tangent.w = -1;
+				float3 temp_cast_0 = (localCalculateTangentsSRP76_g1).xxx;
 				
 				o.ase_texcoord7.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
 				o.ase_texcoord7.zw = 0;
-				float3 vertexValue = localCalculateTangentsSRP76_g1;
+				float3 vertexValue = temp_cast_0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				v.vertex.xyz = vertexValue;
 				#else
@@ -187,10 +189,9 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
         		return o;
         	}
 
-        	half4 frag (GraphVertexOutput IN  ) : SV_Target
+        	half4 frag (GraphVertexOutput IN ) : SV_Target
             {
             	UNITY_SETUP_INSTANCE_ID(IN);
-				UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(IN);
 
         		float3 WorldSpaceNormal = normalize(float3(IN.tSpace0.z,IN.tSpace1.z,IN.tSpace2.z));
 				float3 WorldSpaceTangent = float3(IN.tSpace0.x,IN.tSpace1.x,IN.tSpace2.x);
@@ -221,19 +222,15 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
 				float4 weightedBlend9_g1 = ( weightedBlendVar9_g1.x*( appendResult33_g1 * tex2D( _Splat0, uv_Splat0 ) ) + weightedBlendVar9_g1.y*( appendResult36_g1 * tex2D( _Splat1, uv_Splat1 ) ) + weightedBlendVar9_g1.z*( appendResult39_g1 * tex2D( _Splat2, uv_Splat2 ) ) + weightedBlendVar9_g1.w*( appendResult42_g1 * tex2D( _Splat3, uv_Splat3 ) ) );
 				float4 MixDiffuse28_g1 = weightedBlend9_g1;
 				
-				float2 uv0_Splat0 = IN.ase_texcoord7.xy * _Splat0_ST.xy + _Splat0_ST.zw;
-				float2 uv0_Splat1 = IN.ase_texcoord7.xy * _Splat1_ST.xy + _Splat1_ST.zw;
-				float2 uv0_Splat2 = IN.ase_texcoord7.xy * _Splat2_ST.xy + _Splat2_ST.zw;
-				float2 uv0_Splat3 = IN.ase_texcoord7.xy * _Splat3_ST.xy + _Splat3_ST.zw;
 				float4 weightedBlendVar8_g1 = temp_output_59_0_g1;
-				float4 weightedBlend8_g1 = ( weightedBlendVar8_g1.x*tex2D( _Normal0, uv0_Splat0 ) + weightedBlendVar8_g1.y*tex2D( _Normal1, uv0_Splat1 ) + weightedBlendVar8_g1.z*tex2D( _Normal2, uv0_Splat2 ) + weightedBlendVar8_g1.w*tex2D( _Normal3, uv0_Splat3 ) );
+				float4 weightedBlend8_g1 = ( weightedBlendVar8_g1.x*tex2D( _Normal0, uv_Splat0 ) + weightedBlendVar8_g1.y*tex2D( _Normal1, uv_Splat1 ) + weightedBlendVar8_g1.z*tex2D( _Normal2, uv_Splat2 ) + weightedBlendVar8_g1.w*tex2D( _Normal3, uv_Splat3 ) );
 				
 				float4 appendResult55_g1 = (float4(_Metallic0 , _Metallic1 , _Metallic2 , _Metallic3));
 				float dotResult53_g1 = dot( SplatControl26_g1 , appendResult55_g1 );
 				
 				
 		        float3 Albedo = MixDiffuse28_g1.xyz;
-				float3 Normal = UnpackNormalScale( weightedBlend8_g1, 1.0 );
+				float3 Normal = UnpackNormalmapRGorAG( weightedBlend8_g1, 1.0 );
 				float3 Emission = 0;
 				float3 Specular = float3(0.5, 0.5, 0.5);
 				float Metallic = dotResult53_g1;
@@ -320,7 +317,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             #pragma vertex ShadowPassVertex
             #pragma fragment ShadowPassFragment
 
-            #define ASE_SRP_VERSION 51601
             #define TERRAIN_SPLAT_ADDPASS 1
 
 
@@ -329,6 +325,12 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
+            CBUFFER_START(UnityPerMaterial)
+			sampler2D _Control;
+			float4 _Control_ST;
+			CBUFFER_END
+			
+			
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
@@ -338,8 +340,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
-			sampler2D _Control;
-			float4 _Control_ST;
 
         	struct VertexOutput
         	{
@@ -348,25 +348,26 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
         	};
 
-			
             // x: global clip space bias, y: normal world space bias
+            float4 _ShadowBias;
             float3 _LightDirection;
 
-            VertexOutput ShadowPassVertex(GraphVertexInput v )
+            VertexOutput ShadowPassVertex(GraphVertexInput v)
         	{
         	    VertexOutput o;
         	    UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
 
-				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * v.ase_normal * 0.0 ) );
+				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * 0.0 ) );
 				v.ase_tangent.xyz = cross ( v.ase_normal, float3( 0, 0, 1 ) );
 				v.ase_tangent.w = -1;
+				float3 temp_cast_0 = (localCalculateTangentsSRP76_g1).xxx;
 				
 				o.ase_texcoord7.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
 				o.ase_texcoord7.zw = 0;
-				float3 vertexValue = localCalculateTangentsSRP76_g1;
+				float3 vertexValue = temp_cast_0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				v.vertex.xyz = vertexValue;
 				#else
@@ -382,12 +383,11 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
                 float scale = invNdotL * _ShadowBias.y;
 
                 // normal bias is negative since we want to apply an inset normal offset
-                positionWS = _LightDirection * _ShadowBias.xxx + positionWS;
-				positionWS = normalWS * scale.xxx + positionWS;
+                positionWS = normalWS * scale.xxx + positionWS;
                 float4 clipPos = TransformWorldToHClip(positionWS);
 
                 // _ShadowBias.x sign depens on if platform has reversed z buffer
-                //clipPos.z += _ShadowBias.x;
+                clipPos.z += _ShadowBias.x;
 
         	#if UNITY_REVERSED_Z
         	    clipPos.z = min(clipPos.z, clipPos.w * UNITY_NEAR_CLIP_VALUE);
@@ -399,7 +399,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
         	    return o;
         	}
 
-            half4 ShadowPassFragment(VertexOutput IN  ) : SV_TARGET
+            half4 ShadowPassFragment(VertexOutput IN) : SV_TARGET
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -443,7 +443,6 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             #pragma vertex vert
             #pragma fragment frag
 
-            #define ASE_SRP_VERSION 51601
             #define TERRAIN_SPLAT_ADDPASS 1
 
 
@@ -452,9 +451,13 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
+			CBUFFER_START(UnityPerMaterial)
 			sampler2D _Control;
 			float4 _Control_ST;
-
+			CBUFFER_END
+			
+			
+           
             struct GraphVertexInput
             {
                 float4 vertex : POSITION;
@@ -464,6 +467,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
+
         	struct VertexOutput
         	{
         	    float4 clipPos      : SV_POSITION;
@@ -472,24 +476,23 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
                 UNITY_VERTEX_OUTPUT_STEREO
         	};
 
-			           
-
-            VertexOutput vert(GraphVertexInput v  )
+            VertexOutput vert(GraphVertexInput v)
             {
                 VertexOutput o = (VertexOutput)0;
         	    UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * v.ase_normal * 0.0 ) );
+				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * 0.0 ) );
 				v.ase_tangent.xyz = cross ( v.ase_normal, float3( 0, 0, 1 ) );
 				v.ase_tangent.w = -1;
+				float3 temp_cast_0 = (localCalculateTangentsSRP76_g1).xxx;
 				
 				o.ase_texcoord.xy = v.ase_texcoord.xy;
 				
 				//setting value to unused interpolator channels and avoid initialization warnings
 				o.ase_texcoord.zw = 0;
-				float3 vertexValue = localCalculateTangentsSRP76_g1;
+				float3 vertexValue = temp_cast_0;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				v.vertex.xyz = vertexValue;
 				#else
@@ -502,7 +505,7 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
         	    return o;
             }
 
-            half4 frag(VertexOutput IN  ) : SV_TARGET
+            half4 frag(VertexOutput IN) : SV_TARGET
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
@@ -537,36 +540,25 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
             // Required to compile gles 2.0 with standard srp library
             #pragma prefer_hlslcc gles
             #pragma exclude_renderers d3d11_9x
+            
 
             #pragma vertex vert
             #pragma fragment frag
 
-            #define ASE_SRP_VERSION 51601
-            #define TERRAIN_SPLAT_ADDPASS 1
 
+            
 
 			uniform float4 _MainTex_ST;
-			
+
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/Core.hlsl"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/MetaInput.hlsl"
             #include "Packages/com.unity.render-pipelines.lightweight/ShaderLibrary/ShaderGraphFunctions.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
 
-			sampler2D _Control;
-			float4 _Control_ST;
-			float _Smoothness0;
-			sampler2D _Splat0;
-			float4 _Splat0_ST;
-			float _Smoothness1;
-			sampler2D _Splat1;
-			float4 _Splat1_ST;
-			float _Smoothness2;
-			sampler2D _Splat2;
-			float4 _Splat2_ST;
-			float _Smoothness3;
-			sampler2D _Splat3;
-			float4 _Splat3_ST;
-
+			CBUFFER_START(UnityPerMaterial)
+						CBUFFER_END
+			
+			
             #pragma shader_feature _ _SMOOTHNESS_TEXTURE_ALBEDO_CHANNEL_A
             #pragma shader_feature EDITOR_VISUALIZATION
 
@@ -576,37 +568,27 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
                 float4 vertex : POSITION;
 				float3 ase_normal : NORMAL;
 				float4 texcoord1 : TEXCOORD1;
-				float4 texcoord2 : TEXCOORD2;
-				float4 ase_tangent : TANGENT;
-				float4 ase_texcoord : TEXCOORD0;
+				
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
         	struct VertexOutput
         	{
         	    float4 clipPos      : SV_POSITION;
-                float4 ase_texcoord : TEXCOORD0;
+                
                 UNITY_VERTEX_INPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
         	};
 
-			
-            VertexOutput vert(GraphVertexInput v  )
+            VertexOutput vert(GraphVertexInput v)
             {
                 VertexOutput o = (VertexOutput)0;
         	    UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-				float3 localCalculateTangentsSRP76_g1 = ( ( v.ase_tangent.xyz * v.ase_normal * 0.0 ) );
-				v.ase_tangent.xyz = cross ( v.ase_normal, float3( 0, 0, 1 ) );
-				v.ase_tangent.w = -1;
 				
-				o.ase_texcoord.xy = v.ase_texcoord.xy;
-				
-				//setting value to unused interpolator channels and avoid initialization warnings
-				o.ase_texcoord.zw = 0;
 
-				float3 vertexValue = localCalculateTangentsSRP76_g1;
+				float3 vertexValue =  float3(0,0,0) ;
 				#ifdef ASE_ABSOLUTE_VERTEX_POS
 				v.vertex.xyz = vertexValue;
 				#else
@@ -614,45 +596,20 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
 				#endif
 
 				v.ase_normal =  v.ase_normal ;
-#if !defined( ASE_SRP_VERSION ) || ASE_SRP_VERSION  > 51300				
-                o.clipPos = MetaVertexPosition(v.vertex, v.texcoord1.xy, v.texcoord1.xy, unity_LightmapST, unity_DynamicLightmapST);
-#else
-				o.clipPos = MetaVertexPosition (v.vertex, v.texcoord1.xy, v.texcoord2.xy, unity_LightmapST);
-#endif
+				
+                o.clipPos = MetaVertexPosition(v.vertex, v.texcoord1.xy, v.texcoord1.xy, unity_LightmapST);
         	    return o;
             }
 
-            half4 frag(VertexOutput IN  ) : SV_TARGET
+            half4 frag(VertexOutput IN) : SV_TARGET
             {
                 UNITY_SETUP_INSTANCE_ID(IN);
 
-           		float2 uv_Control = IN.ase_texcoord.xy * _Control_ST.xy + _Control_ST.zw;
-           		float4 tex2DNode5_g1 = tex2D( _Control, uv_Control );
-           		float dotResult20_g1 = dot( tex2DNode5_g1 , float4(1,1,1,1) );
-           		float SplatWeight22_g1 = dotResult20_g1;
-           		float localSplatClip74_g1 = ( SplatWeight22_g1 );
-           		float SplatWeight74_g1 = SplatWeight22_g1;
-           		#if !defined(SHADER_API_MOBILE) && defined(TERRAIN_SPLAT_ADDPASS)
-           		clip(SplatWeight74_g1 == 0.0f ? -1 : 1);
-           		#endif
-           		float4 SplatControl26_g1 = ( tex2DNode5_g1 / ( localSplatClip74_g1 + 0.001 ) );
-           		float4 temp_output_59_0_g1 = SplatControl26_g1;
-           		float4 appendResult33_g1 = (float4(1.0 , 1.0 , 1.0 , _Smoothness0));
-           		float2 uv_Splat0 = IN.ase_texcoord.xy * _Splat0_ST.xy + _Splat0_ST.zw;
-           		float4 appendResult36_g1 = (float4(1.0 , 1.0 , 1.0 , _Smoothness1));
-           		float2 uv_Splat1 = IN.ase_texcoord.xy * _Splat1_ST.xy + _Splat1_ST.zw;
-           		float4 appendResult39_g1 = (float4(1.0 , 1.0 , 1.0 , _Smoothness2));
-           		float2 uv_Splat2 = IN.ase_texcoord.xy * _Splat2_ST.xy + _Splat2_ST.zw;
-           		float4 appendResult42_g1 = (float4(1.0 , 1.0 , 1.0 , _Smoothness3));
-           		float2 uv_Splat3 = IN.ase_texcoord.xy * _Splat3_ST.xy + _Splat3_ST.zw;
-           		float4 weightedBlendVar9_g1 = temp_output_59_0_g1;
-           		float4 weightedBlend9_g1 = ( weightedBlendVar9_g1.x*( appendResult33_g1 * tex2D( _Splat0, uv_Splat0 ) ) + weightedBlendVar9_g1.y*( appendResult36_g1 * tex2D( _Splat1, uv_Splat1 ) ) + weightedBlendVar9_g1.z*( appendResult39_g1 * tex2D( _Splat2, uv_Splat2 ) ) + weightedBlendVar9_g1.w*( appendResult42_g1 * tex2D( _Splat3, uv_Splat3 ) ) );
-           		float4 MixDiffuse28_g1 = weightedBlend9_g1;
            		
 				
-		        float3 Albedo = MixDiffuse28_g1.xyz;
+		        float3 Albedo = float3(0.5, 0.5, 0.5);
 				float3 Emission = 0;
-				float Alpha = SplatWeight22_g1;
+				float Alpha = 1;
 				float AlphaClipThreshold = 0;
 
          #if _AlphaClip
@@ -675,13 +632,13 @@ Shader "ASESampleShaders/SRP Lightweight/TerrainAddPass"
 	
 }
 /*ASEBEGIN
-Version=16705
-420;350;1003;669;1215.969;380.351;1.107291;True;False
-Node;AmplifyShaderEditor.FunctionNode;14;-882.8884,-118.9244;Float;False;Four Splats First Pass Terrain;0;;1;37452fdfb732e1443b7e39720d05b708;0;6;59;FLOAT4;0,0,0,0;False;60;FLOAT4;0,0,0,0;False;61;FLOAT3;0,0,0;False;57;FLOAT;0;False;58;FLOAT;0;False;62;FLOAT;0;False;6;FLOAT4;0;FLOAT3;14;FLOAT;56;FLOAT;45;FLOAT;19;FLOAT3;17
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;True;ShadowCaster;0;1;ShadowCaster;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;True;DepthOnly;0;2;DepthOnly;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;-304,-192;Float;False;True;2;Float;ASEMaterialInspector;0;2;ASESampleShaders/SRP Lightweight/TerrainAddPass;1976390536c6c564abb90fe41f6ee334;True;Base;0;0;Base;11;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=-99;True;2;0;True;4;1;False;-1;1;False;-1;0;1;False;-1;0;False;-1;False;False;False;True;True;True;True;True;0;False;-1;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=LightweightForward;False;1;Define;TERRAIN_SPLAT_ADDPASS 1;False;;;0;0;Standard;2;Vertex Position,InvertActionOnDeselection;1;Receive Shadows;1;1;_FinalColorxAlpha;1;4;True;True;True;True;False;11;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;9;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;6;FLOAT;0;False;7;FLOAT;0;False;8;FLOAT3;0,0,0;False;10;FLOAT3;0,0,0;False;0
-Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;15;-304,-162;Float;False;False;2;Float;ASEMaterialInspector;0;1;Hidden/Templates/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;True;Meta;0;3;Meta;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;True;2;False;-1;False;False;False;False;False;True;1;LightMode=Meta;False;0;;0;0;Standard;0;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;3;FLOAT;0;False;4;FLOAT3;0,0,0;False;5;FLOAT3;0,0,0;False;0
+Version=16201
+442;73;933;593;1350.147;388.8552;1;True;False
+Node;AmplifyShaderEditor.FunctionNode;14;-882.8884,-118.9244;Float;False;Four Splats First Pass Terrain;0;;1;37452fdfb732e1443b7e39720d05b708;0;6;59;FLOAT4;0,0,0,0;False;60;FLOAT4;0,0,0,0;False;61;FLOAT3;0,0,0;False;57;FLOAT;0;False;58;FLOAT;0;False;62;FLOAT;0;False;6;FLOAT4;0;FLOAT3;14;FLOAT;56;FLOAT;45;FLOAT;19;FLOAT;17
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;1;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;0;1;ShadowCaster;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;False;False;True;1;False;-1;True;3;False;-1;False;True;1;LightMode=ShadowCaster;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;2;0,0;Float;False;False;2;Float;ASEMaterialInspector;0;2;ASETemplateShaders/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;0;2;DepthOnly;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;False;True;False;False;False;False;0;False;-1;False;True;1;False;-1;False;False;True;1;LightMode=DepthOnly;False;0;;0;0;Standard;0;4;0;FLOAT;0;False;1;FLOAT;0;False;2;FLOAT3;0,0,0;False;3;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;0;-304,-192;Float;False;True;2;Float;ASEMaterialInspector;0;2;ASESampleShaders/SRP Lightweight/TerrainAddPass;1976390536c6c564abb90fe41f6ee334;0;0;Base;11;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=-99;True;2;0;True;4;1;False;-1;1;False;-1;0;1;False;-1;0;False;-1;False;False;False;True;True;True;True;True;0;False;-1;True;False;255;False;-1;255;False;-1;255;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;7;False;-1;1;False;-1;1;False;-1;1;False;-1;True;1;False;-1;True;3;False;-1;True;True;0;False;-1;0;False;-1;True;1;LightMode=LightweightForward;False;1;Define;TERRAIN_SPLAT_ADDPASS 1;False;;;0;0;Standard;1;Vertex Position,InvertActionOnDeselection;1;1;_FinalColorxAlpha;1;4;True;True;True;True;11;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT3;0,0,0;False;9;FLOAT3;0,0,0;False;3;FLOAT;0;False;4;FLOAT;0;False;5;FLOAT;0;False;6;FLOAT;0;False;7;FLOAT;0;False;8;FLOAT3;0,0,0;False;10;FLOAT3;0,0,0;False;0
+Node;AmplifyShaderEditor.TemplateMultiPassMasterNode;15;-304,-162;Float;False;False;2;Float;ASEMaterialInspector;0;1;Hidden/Templates/LightWeightSRPPBR;1976390536c6c564abb90fe41f6ee334;0;3;Meta;0;False;False;False;True;0;False;-1;False;False;False;False;False;True;3;RenderPipeline=LightweightPipeline;RenderType=Opaque=RenderType;Queue=Geometry=Queue=0;True;2;0;False;False;False;True;2;False;-1;False;False;False;False;False;True;1;LightMode=Meta;False;0;;0;0;Standard;0;6;0;FLOAT3;0,0,0;False;1;FLOAT3;0,0,0;False;2;FLOAT;0;False;3;FLOAT;0;False;4;FLOAT3;0,0,0;False;5;FLOAT3;0,0,0;False;0
 WireConnection;0;0;14;0
 WireConnection;0;1;14;14
 WireConnection;0;3;14;56
@@ -689,4 +646,4 @@ WireConnection;0;4;14;45
 WireConnection;0;6;14;19
 WireConnection;0;8;14;17
 ASEEND*/
-//CHKSM=0FB2780F4BEC35F470599338D6AD1414E658E8E5
+//CHKSM=885081C28962CB607403A4EB869CEA18FC69F1C7

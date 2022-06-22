@@ -55,12 +55,12 @@ Material:
     - _Threshold: 0.5
     - __dirty: 0
     m_Colors:
-    - _Albedo: {r: 0.7647059, g: 0.5730754, b: 0.11245612, a: 0}
+    - _Albedo: {r: 0.7647059, g: 0.5730754, b: 0.11245615, a: 0}
     - _BodyGlow: {r: 0.6323529, g: 0.4794762, b: 0, a: 0}
     - _Color0: {r: 0.63235295, g: 0.47947615, b: 0, a: 0}
-    - _GlintColor: {r: 1, g: 0.9154145, b: 0.4292426, a: 0}
+    - _GlintColor: {r: 1, g: 0.9154145, b: 0.42924264, a: 0}
     - _GlintFresnel: {r: 0.01, g: 3, b: 4, a: 0}
     - _MainGlowFresnel: {r: 0.02, g: 1, b: 5, a: 0}
     - _SizeSpeedInterval: {r: 0.5, g: 10, b: 5, a: 0}
-    - _SparkleColor: {r: 1, g: 0.7779999, b: 0.2971669, a: 1}
+    - _SparkleColor: {r: 1, g: 0.7779999, b: 0.29716694, a: 1}
     - _SparkleFresnel: {r: 0.02, g: 0.8, b: 2, a: 0}

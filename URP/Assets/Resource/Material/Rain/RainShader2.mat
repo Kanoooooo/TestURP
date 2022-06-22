@@ -1,0 +1,99 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 8
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RainShader2
+  m_Shader: {fileID: 4800000, guid: 73b4df53b2f710746b78310655e5efff, type: 3}
+  m_ValidKeywords: []
+  m_InvalidKeywords: []
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _AOTexture:
+        m_Texture: {fileID: 2800000, guid: 0cdc794126017da4b8ab2daee0990c35, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _AOTexture1:
+        m_Texture: {fileID: 2800000, guid: ff294b85190fd7449b97fa1ea5db718e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GroundDiffuse:
+        m_Texture: {fileID: 2800000, guid: 0ce9a2fc37acd534bbef2f795a0f755a, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GroundMap:
+        m_Texture: {fileID: 2800000, guid: cebce6e608adfca4e8465b4003ebe71f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _GroundNormal:
+        m_Texture: {fileID: 2800000, guid: cebce6e608adfca4e8465b4003ebe71f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _HeightTexture:
+        m_Texture: {fileID: 2800000, guid: ff294b85190fd7449b97fa1ea5db718e, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RippleNormalMap:
+        m_Texture: {fileID: 2800000, guid: 94a4ccef4fb25a44b88871dcd07fcafd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureSample0:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Water_Normal:
+        m_Texture: {fileID: 2800000, guid: 94a4ccef4fb25a44b88871dcd07fcafd, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _texcoord:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_Lightmaps:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_LightmapsInd:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - unity_ShadowMasks:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Ints: []
+    m_Floats:
+    - _AOBrightness: 0.199
+    - _AlphaCutoff: 0.5
+    - _GroundTilling: 3
+    - _Height: 0.752
+    - _MudSmoothness: 0.666
+    - _QueueControl: 0
+    - _QueueOffset: 0
+    - _RippleAreaSpeed: 0.6
+    - _RippleAreaTilling: 2
+    - _RippleBumplness: 0.8
+    - _RippleSpeed: 18
+    - _RippleTilling: 6
+    - _RockaWaterBumpiness: 0.6
+    - _StoneSmoothness: 1
+    - _Tessellation: 20.2
+    - _WaterBumpiness: 0.6
+    - _WaterBumpiness1: 1
+    - _WaterHeight: 0.767
+    - _WaterSpeen: 0.209
+    - _WaterTilling: 40
+    m_Colors:
+    - _EmissionColor: {r: 1, g: 1, b: 1, a: 1}
+  m_BuildTextureStacks: []
